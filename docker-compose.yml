@@ -1,0 +1,45 @@
+version: "2"
+
+services:
+
+  dev:
+    image: golang:1.13
+    volumes:
+      - ./:/go/src/app
+      - ~/.kube:/.kube
+    working_dir: /go/src/app
+    environment:
+      namespace: argo
+    tty: true
+    ports:
+      - 7778:7777
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: punchclock:v1.0
+    volumes:
+      - ./:/go/src/app
+      - ~/.kube:/.kube
+    working_dir: /go/src/app
+    environment:
+      namespace: argo
+    tty: true
+    ports:
+      - 7777:7777
+
+  database:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: changeme
+      MYSQL_DATABASE: punchclock
+      MYSQL_USER: pc_user
+      MYSQL_PASSWORD: changeme
+    ports:
+    - "3306"
+    expose:
+    - "3306"
+    volumes:
+    - "~/punchclock/db:/var/lib/mysql"
